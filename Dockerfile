@@ -5,18 +5,18 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (including dev dependencies)
 RUN npm install
 
 # Copy source files
 COPY . .
 
-# Set environment variables for Next.js build
+# Set environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 
-# Build the application
-RUN npm run build
+# Expose port
+EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# Start the development server
+CMD ["npm", "run", "dev"]
