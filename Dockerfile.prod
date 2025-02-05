@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies including dev dependencies for build
+RUN npm ci
 
 # Copy source files
 COPY . .
@@ -22,15 +22,25 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy only necessary files
-COPY --from=builder /app/next.config.* ./
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+# Copy standalone build
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=256"
 
 # Expose port
 EXPOSE 3000
 
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD curl -f http://localhost:3000/ || exit 1
+
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
