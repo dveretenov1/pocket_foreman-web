@@ -6,7 +6,7 @@ const nextConfig = {
     domains: ['via.placeholder.com'],
   },
   experimental: {
-    serverComponentsExternalPackages: ['sharp'], // Improves image optimization in production
+    // Remove sharp from external packages to use Next.js built-in image optimization
   },
   async rewrites() {
     return [
